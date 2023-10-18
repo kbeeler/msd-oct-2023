@@ -1,4 +1,5 @@
-﻿using DotNetCore.CAP;
+﻿using Consul;
+using DotNetCore.CAP;
 using Marten;
 using Portal.Api.SoftwareApi.Entities;
 using Portal.Api.UserApi.Entities;
@@ -19,13 +20,13 @@ public class KafkfaUserHandler
 
     public async Task ConsumesAsync(UserIssueCreated @event)
     {
-        var issue = await _session.LoadAsync<UserIssueEntity>(@event.IssueId);
+       
         var software = await _session.LoadAsync<SoftwareEntity>(@event.SoftwareId);
         var user = await _session.LoadAsync<UserEntity>(@event.UserId);
-
+        if(user is null || software is null) { return; }
         var message = new UserIssueCreatedPublicEvent
         {
-            IssueId = issue.IssueId.ToString(),
+            IssueId = @event.Id.ToString(),
             User = user.Identifier,
             SoftwareId = software.SourceId,
             Description = @event.Narrative,

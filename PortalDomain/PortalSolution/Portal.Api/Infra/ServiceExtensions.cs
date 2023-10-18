@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using DotNetCore.CAP;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 
 using Marten;
@@ -67,23 +68,32 @@ public static class ServicesExtensions
         {
             marten.OptimizeArtifactWorkflow();
         }
+        var kafkaConnectionString = config.GetConnectionString("kafka") ?? throw new Exception("Need a Kafka Broker");
 
+        void CapSetupActionsProducer(CapOptions options)
+        {
+            options.UseKafka(kafkaConnectionString);
+            options.UsePostgreSql(connectionString);
+        }
+        void CapSetupActionsConsumer(CapOptions options)
+        {
+            options.UseKafka(kafkaConnectionString);
+            options.UsePostgreSql(connectionString);
+            options.UseDashboard();
+        }
+        services.AddCap(CapSetupActionsConsumer);
         builder.Host.UseWolverine(opts =>
         {
             opts.Services.AddMarten(connectionString)
             .IntegrateWithWolverine().UseLightweightSessions();
             opts.Policies.AutoApplyTransactions();
             Console.WriteLine(opts.DescribeHandlerMatch(typeof(KafkfaUserHandler)));
+            opts.Services.AddCap(CapSetupActionsProducer);
+
         });
 
-        var kafkaConnectionString = config.GetConnectionString("kafka") ?? throw new Exception("Need a Kafka Broker");
 
-        services.AddCap(options =>
-        {
-            options.UseKafka(kafkaConnectionString);
-            options.UsePostgreSql(connectionString);
-            options.UseDashboard();
-        });
+   
         return services;
     }
 }

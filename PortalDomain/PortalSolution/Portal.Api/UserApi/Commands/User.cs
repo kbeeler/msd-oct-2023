@@ -2,15 +2,8 @@
 
 namespace Portal.Api.UserApi.Commands;
 
-
-
-
-
 public record GetUser();
-
-
 public record CreateUserIssue(Guid SoftwareId, string Narrative);
-
 
 public class CreateUserIssueValidator : AbstractValidator<CreateUserIssue>
 {

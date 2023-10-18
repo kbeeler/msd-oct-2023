@@ -4,7 +4,7 @@ public record UserEntity(Guid Id, DateTimeOffset CreatedOn, string Identifier, L
 
 
 
-public record UserIssueEntity(Guid IssueId, Guid SoftwareId, string Description, DateTimeOffset created);
+public record UserIssueEntity(Guid Id, Guid SoftwareId, string Description, DateTimeOffset created);
 
 
 /*export type UserIssue = {
